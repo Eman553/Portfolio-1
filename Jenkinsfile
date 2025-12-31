@@ -31,7 +31,7 @@ pipeline {
         } 
         stage('Docker Build & Deploy') { 
             steps { 
-                sshagent(['docker-server-ssh']) { 
+                sshagent(['docker-credentials']) { 
                     sh """ 
                     scp -o StrictHostKeyChecking=no index.html Dockerfile ${DOCKER_SERVER}:/home/ubuntu/ 
                     ssh -o StrictHostKeyChecking=no ${DOCKER_SERVER} ' 
