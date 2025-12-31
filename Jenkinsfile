@@ -18,12 +18,8 @@ pipeline {
                 script { 
                     def scannerHome = tool 'SonarQube Scanner' 
                     withSonarQubeEnv("${SONARQUBE_ENV}") { 
-                        sh """ 
-                        ${scannerHome}/bin/sonar-scanner \ 
-                        -Dsonar.projectKey=portfolio-cloud \ 
-                        -Dsonar.projectName=portfolio-cloud \ 
-                        -Dsonar.sources=. 
-                        """ 
+                        // I removed the backslashes to make the command cleaner and error-free
+                        sh "${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=portfolio-cloud -Dsonar.projectName=portfolio-cloud -Dsonar.sources=."
                     } 
                 } 
             } 
@@ -32,15 +28,13 @@ pipeline {
             steps { 
                 sshagent(['docker-server-ssh']) { 
                     sh """ 
-                    # index.html is being used here 
-                    scp -o StrictHostKeyChecking=no index.html Dockerfile 
-${DOCKER_SERVER}:/home/ubuntu/ 
+                    scp -o StrictHostKeyChecking=no index.html Dockerfile ${DOCKER_SERVER}:/home/ubuntu/ 
                     ssh -o StrictHostKeyChecking=no ${DOCKER_SERVER} ' 
-                    cd /home/ubuntu 
-                    docker build -t portfolio-app . 
-                    docker stop portfolio-app || true 
-                    docker rm portfolio-app || true 
-                    docker run -d -p 80:80 --name portfolio-app portfolio-app 
+                        cd /home/ubuntu 
+                        docker build -t portfolio-app . 
+                        docker stop portfolio-app || true 
+                        docker rm portfolio-app || true 
+                        docker run -d -p 80:80 --name portfolio-app portfolio-app 
                     ' 
                     """ 
                 } 
@@ -49,10 +43,10 @@ ${DOCKER_SERVER}:/home/ubuntu/
     } 
     post { 
         success { 
-            echo "    Deployment Successful: http://172.31.26.188" 
+            echo "Deployment Successful: http://172.31.26.188" 
         } 
         failure { 
-            echo "   Pipeline Failed" 
+            echo "Pipeline Failed" 
         } 
     } 
-} 
+}
