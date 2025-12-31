@@ -3,7 +3,9 @@ pipeline {
     environment { 
         REPO_URL      = 'https://github.com/Eman553/Portfolio-1' 
         SONARQUBE_ENV = 'SonarQube-Server' 
-        DOCKER_SERVER = 'ubuntu@ip-172-31-17-210' 
+        DOCKER_SERVER = 'ubuntu@ip-172-31-17-210'
+        // Limit JVM RAM to 256MB to prevent the instance from freezing
+        SONAR_SCANNER_OPTS = '-Xmx256m'
     } 
     stages { 
         stage('Checkout Code') { 
@@ -18,8 +20,11 @@ pipeline {
                 script { 
                     def scannerHome = tool 'SonarQube Scanner' 
                     withSonarQubeEnv("${SONARQUBE_ENV}") { 
-                        // I removed the backslashes to make the command cleaner and error-free
-                        sh "${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=portfolio-cloud -Dsonar.projectName=portfolio-cloud -Dsonar.sources=."
+                        // Added -Dsonar.scm.disabled=true to speed up and save RAM
+                        sh "${scannerHome}/bin/sonar-scanner \
+                        -Dsonar.projectKey=portfolio-cloud \
+                        -Dsonar.sources=. \
+                        -Dsonar.scm.disabled=true"
                     } 
                 } 
             } 
